@@ -4,7 +4,6 @@ import sys
 from app_models import ImpResponses
 import catcher as ctch
 
-
 class MainWin(QMainWindow):
 
     def __init__(self, *args, **kwargs):
