@@ -2,7 +2,7 @@ import wave
 import numpy as np
 import matplotlib.pyplot as plt
 
-def get_audio_data(file_dir : str) -> tuple:
+def get_audio_data(file_dir : str) -> dict:
     with wave.open(file_dir, 'rb') as wf:
         channels = wf.getnchannels()
         samp_rate = wf.getframerate()
@@ -15,10 +15,11 @@ def get_audio_data(file_dir : str) -> tuple:
             fft_data=np.fft.fft(wf_array)
             spectrum=np.abs(fft_data)
             freqs=np.fft.fftfreq(n=samples, d=1/samp_rate)
-            print(samples)
-            print(samp_rate)
-            print(len(freqs))
-            return (wf_array, time, spectrum, freqs)
+            audio_data_dict : dict = {'wave_form' : wf_array, 
+                                      'seconds' : time, 
+                                      'spectrum' : spectrum,
+                                      'frequence' : freqs}
+            return audio_data_dict
 
 def get_dtype(wf : wave.Wave_read) -> np.signedinteger:
     samp_width = wf.getsampwidth()
@@ -44,6 +45,6 @@ def plot_spectrum(spectrum : np.ndarray, freqs:np.ndarray) -> None:
     plt.title('Espectro de frecuencias')
     plt.show()
 
-audio_data = get_audio_data('varios_widgets/IRCwidget/100.wav')
-plot_wf(audio_data[0],audio_data[1])
-plot_spectrum(audio_data[2],audio_data[3])
+audio_data = get_audio_data('IRCwidget/100.wav')
+plot_wf(audio_data.get('wave_form'),audio_data['seconds'])
+plot_spectrum(audio_data['spectrum'],audio_data['frequence'])

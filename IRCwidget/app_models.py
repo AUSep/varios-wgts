@@ -1,7 +1,7 @@
 from peewee import SqliteDatabase, Model, CharField, TextField, DateTimeField, BlobField
 from datetime import datetime
 
-db = SqliteDatabase('varios_widgets/IRCwidget/test.db')
+db = SqliteDatabase('IRCwidget/test.db')
 now = datetime.now()
 
 class ImpResponses(Model):
