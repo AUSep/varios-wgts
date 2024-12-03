@@ -2,7 +2,7 @@ import wave
 import numpy as np
 import matplotlib.pyplot as plt
 
-def get_audio_data(file_dir : str) -> dict:
+def get_array_dict(file_dir : str) -> dict[np.ndarray]:
     with wave.open(file_dir, 'rb') as wf:
         channels = wf.getnchannels()
         samp_rate = wf.getframerate()
@@ -30,21 +30,15 @@ def get_dtype(wf : wave.Wave_read) -> np.signedinteger:
     elif samp_width == 4:
         dtype = np.int32
     return dtype
-        
-def plot_wf(wf : np.ndarray, time : np.ndarray) -> None: 
-    plt.plot(time, wf)
-    plt.xlabel('tiempo')
-    plt.ylabel('amplitud')
-    plt.title('Waveform')
-    plt.show()
 
-def plot_spectrum(spectrum : np.ndarray, freqs:np.ndarray) -> None:
-    plt.plot(freqs, spectrum)
-    plt.xlabel('frecuencias')
-    plt.ylabel('amplitud')
-    plt.title('Espectro de frecuencias')
-    plt.show()
-
-audio_data = get_audio_data('IRCwidget/100.wav')
-plot_wf(audio_data.get('wave_form'),audio_data['seconds'])
-plot_spectrum(audio_data['spectrum'],audio_data['frequence'])
+def print_comp_graph(*arrays_dicts: dict[str : np.ndarray]) -> None:
+    for array in arrays_dicts:
+        fig, (wf_ax, spect_ax) = plt.subplots(2)
+        wf_ax.plot(array['seconds'], array['wave_form'])
+        wf_ax.set(xlabel='Tiempo', ylabel='Amplitud')
+        spect_ax.plot(array['frequence'], array['spectrum'])
+        spect_ax.set(xlabel='Frecuencias', ylabel='Amplitud')
+        plt.show()
+  
+audio_data = get_array_dict('IRCwidget/100.wav')
+print_comp_graph(audio_data)
