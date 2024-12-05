@@ -44,7 +44,14 @@ def mult_plot_data(*plot_data: dict[str : np.ndarray]) -> dict[np.ndarray]:
             time = data['seconds']
         if let()
         
-def get_largest_array()
+def largest_arrays(*dicts : dict[str : np.ndarrary]) -> dict:
+    d_max={}
+    for d in dicts:
+        for k in d.keys():
+            if k not in d_max or d_max[k] < d[k]:
+                d_max[k] = d[k]
+    return d_max
+
 
 def print_comp_graph(*arrays_dicts: dict[str : np.ndarray | list]) -> None:
     for array in arrays_dicts:
