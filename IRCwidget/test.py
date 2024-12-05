@@ -35,14 +35,13 @@ def signal_plot_data(file_dir : str) -> dict[np.ndarray]:
             raise Exception('The audio file should be mono')
 
 def mult_plot_data(*plot_data: dict[str : np.ndarray]) -> dict[np.ndarray]:
-    time: np.ndarray | int = 0
-    freqs: np.ndarray | int = 0
-    wf_arrays = [data['wave_form'] for data in plot_data]
-    spectrum = [data['spectrum'] for data in plot_data]
-    for data in plot data:
-        if len(data['seconds']) > len(time):
-            time = data['seconds']
-        if let()
+    x = []
+    y = []
+    for data in plot_data:
+        d_x = {k:v for (k,v) in data if k == 'seconds' or k== 'frequence'}
+        d_y = {k:v for (k,v) in data if k== 'wave_form' or k='spectrum'}
+        x.append(d_X)
+        y.append(d_y)
         
 def largest_arrays(*dicts : dict[str : np.ndarrary]) -> dict:
     d_max={}
@@ -52,7 +51,29 @@ def largest_arrays(*dicts : dict[str : np.ndarrary]) -> dict:
                 d_max[k] = d[k]
     return d_max
 
+def normalize_arrays(*arr_d:dict[np.ndarray*]) -> dict[np.ndarray]:
+    waves_list = []
+    spect_list = []
+    for arrays in arr_d:
+        for arr in array:
+            if arr == 'wave_form':
+                wave_list.append(arr)
+            elif arr == 'spectrum':
+                spect_list.append(arr)
+    waves_size= len(max(waves_list))
+    waves_size= len(max(waves_list))
 
+    lengths = [len(array) for array in arrays]
+    len_arr = max(lengths)
+    complete_arrays = []
+    for array in arrays:
+        dif = len_array - len(array)
+        z_arr = np.array([0]*dif)
+        new_arr = np.concatenate([array,z_array])
+        complete_arrays.append(new_arr)
+        
+    return new_arr
+    
 def print_comp_graph(*arrays_dicts: dict[str : np.ndarray | list]) -> None:
     for array in arrays_dicts:
         fig, (wf_ax, spect_ax) = plt.subplots(2)
