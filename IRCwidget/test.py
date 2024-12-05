@@ -42,7 +42,10 @@ def mult_plot_data(*plot_data: dict[str : np.ndarray]) -> dict[np.ndarray]:
         d_y = {k:v for (k,v) in data if k== 'wave_form' or k='spectrum'}
         x.append(d_X)
         y.append(d_y)
-        
+    x = tuple(x)
+    d_x=largest_arrays(x)
+    y = [normalize_array(y,len(d_x['seconds'])), for y in y if ]
+
 def largest_arrays(*dicts : dict[str : np.ndarrary]) -> dict:
     d_max={}
     for d in dicts:
@@ -51,27 +54,10 @@ def largest_arrays(*dicts : dict[str : np.ndarrary]) -> dict:
                 d_max[k] = d[k]
     return d_max
 
-def normalize_arrays(*arr_d:dict[np.ndarray*]) -> dict[np.ndarray]:
-    waves_list = []
-    spect_list = []
-    for arrays in arr_d:
-        for arr in array:
-            if arr == 'wave_form':
-                wave_list.append(arr)
-            elif arr == 'spectrum':
-                spect_list.append(arr)
-    waves_size= len(max(waves_list))
-    waves_size= len(max(waves_list))
-
-    lengths = [len(array) for array in arrays]
-    len_arr = max(lengths)
-    complete_arrays = []
-    for array in arrays:
-        dif = len_array - len(array)
-        z_arr = np.array([0]*dif)
-        new_arr = np.concatenate([array,z_array])
-        complete_arrays.append(new_arr)
-        
+def normalize_array(array: np.ndarray, size : int) -> dict[np.ndarray]:
+    dif = len_array - len(array)
+    z_arr = np.array([0]*dif)
+    new_arr = np.concatenate([array,z_array])
     return new_arr
     
 def print_comp_graph(*arrays_dicts: dict[str : np.ndarray | list]) -> None:
