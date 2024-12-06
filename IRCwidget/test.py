@@ -35,39 +35,50 @@ def signal_plot_data(file_dir : str) -> dict[np.ndarray]:
             raise Exception('The audio file should be mono')
 
 def mult_plot_data(*plot_data: dict[str : np.ndarray]) -> dict[np.ndarray]:
-    x = []
-    y = []
+    w_arrays: list[np.ndarray] = []
+    t_arrays: list[np.ndarray] = []
+    s_arrays: list[np.ndarray] = []
+    f_arrays: list[np.ndarray] = []
     for data in plot_data:
-        d_x = {k:v for (k,v) in data if k == 'seconds' or k== 'frequence'}
-        d_y = {k:v for (k,v) in data if k== 'wave_form' or k='spectrum'}
-        x.append(d_X)
-        y.append(d_y)
-    x = tuple(x)
-    d_x=largest_arrays(x)
-    y = [normalize_array(y,len(d_x['seconds'])), for y in y if ]
+        for k in data:
+            if k == 'wave_form':
+                w_arrays.append(data[k])
+            elif k == 'seconds':
+                t_arrays.append(data[k])
+            elif k == 'spectrum':
+                s_arrays.append(data[k])
+            elif k == 'frequence':
+                f_arrays.append(data[k])
+    mult_plot_d = {'wave_form' : tuple(w_arrays),
+                    'seconds' : tuple(t_arrays),
+                    'spectrum' : tuple(s_arrays),
+                    'frequence' : tuple(f_arrays)}
+    mult_plot_d = format_data_d(mult_plot_d)
 
-def largest_arrays(*dicts : dict[str : np.ndarrary]) -> dict:
-    d_max={}
-    for d in dicts:
-        for k in d.keys():
-            if k not in d_max or d_max[k] < d[k]:
-                d_max[k] = d[k]
-    return d_max
+def format_data_d(data_d: dict[str : np.ndarray]) -> dict:
+    for k in data_d:
+        if data_d[k] == 'seconds' or data_d[k] == 'frequence':
+            arr = max(data_d[k])
+            data_d[k] = arr
+    t_size = len(data_d['seconds'])
+    f_size = len(data_d['frequence'])
+    data_d['wave_form'] = resize_arrays(data_d['wave_form'], t_size)
+    data_d['spectrum'] = resize_arrays(data_d['spectrum'], f_size)
+    return data_d
 
-def normalize_array(array: np.ndarray, size : int) -> dict[np.ndarray]:
-    dif = len_array - len(array)
-    z_arr = np.array([0]*dif)
-    new_arr = np.concatenate([array,z_array])
-    return new_arr
+def resize_arrays(*arrays: np.ndarray, size : int) -> tuple:
+    arr_resized = []
+    for array in arrays:
+        dif = size - len(array)
+        z_arr = np.array([0]*dif)
+        array = np.concatenate([array,z_arr])
+        arr_resized.append(array)
+    return tuple(arr_resized)
     
-def print_comp_graph(*arrays_dicts: dict[str : np.ndarray | list]) -> None:
-    for array in arrays_dicts:
-        fig, (wf_ax, spect_ax) = plt.subplots(2)
-        wf_ax.plot(array['seconds'], array['wave_form'])
-        wf_ax.set(xlabel='Tiempo', ylabel='Amplitud')
-        spect_ax.plot(array['frequence'], array['spectrum'])
-        spect_ax.set(xlabel='Frecuencias', ylabel='Amplitud')
-        plt.show()
+    #todo
+def print_comp_graph(array_dict: dict[str : np.ndarray | list]) -> None:
+    pass
   
-audio_data = get_array_dict('IRCwidget/100.wav')
+audio_data = signal_plot_data('IRCwidget/100.wav')
 print_comp_graph(audio_data)
+
