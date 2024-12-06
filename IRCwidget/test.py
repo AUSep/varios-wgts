@@ -88,6 +88,7 @@ def print_comp_graph(arr_dict: dict) -> None:
         plt.plot(t_array, arr, get_random_colour())
     for arr in arr_dict['spectrum']:
         plt.plot(f_array, arr, get_random_colour())
+    plt.show()
         
 audio_data = signal_plot_data('IRCwidget/100.wav')
 print_comp_graph(audio_data)
