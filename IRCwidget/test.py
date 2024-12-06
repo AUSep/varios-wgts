@@ -54,6 +54,7 @@ def mult_plot_data(*plot_data: dict[str : np.ndarray]) -> dict[np.ndarray]:
                     'spectrum' : tuple(s_arrays),
                     'frequence' : tuple(f_arrays)}
     mult_plot_d = format_data_d(mult_plot_d)
+return mult_plot_data
 
 def format_data_d(data_d: dict[str : np.ndarray]) -> dict:
     for k in data_d:
@@ -74,11 +75,19 @@ def resize_arrays(*arrays: np.ndarray, size : int) -> tuple:
         array = np.concatenate([array,z_arr])
         arr_resized.append(array)
     return tuple(arr_resized)
+
+def get_random_colour() -> tuple:
+    cmap = plt.cm.get_cmap('viridis', 20)
+    color=cmap(random.randint(0, 19))
+    return colour
     
-    #todo
-def print_comp_graph(array_dict: dict[str : np.ndarray | list]) -> None:
-    pass
-  
+def print_comp_graph(arr_dict: dict) -> None:
+    t_array = arr_dict['seconds']
+    f_array = arr_dict['frequence']
+    for arr in arr_dict['wave_form']:
+        plt.plot(t_array, arr, get_random_colour())
+    for arr in arr_dict['spectrum']:
+        plt.plot(f_array, arr, get_random_colour())
+        
 audio_data = signal_plot_data('IRCwidget/100.wav')
 print_comp_graph(audio_data)
-
