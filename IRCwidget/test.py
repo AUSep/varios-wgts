@@ -1,6 +1,7 @@
 import wave
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 def get_dtype(wf : wave.Wave_read) -> np.signedinteger:
     samp_width = wf.getsampwidth()
@@ -54,7 +55,7 @@ def mult_plot_data(*plot_data: dict[str : np.ndarray]) -> dict[np.ndarray]:
                     'spectrum' : tuple(s_arrays),
                     'frequence' : tuple(f_arrays)}
     mult_plot_d = format_data_d(mult_plot_d)
-return mult_plot_data
+    return mult_plot_data
 
 def format_data_d(data_d: dict[str : np.ndarray]) -> dict:
     for k in data_d:
@@ -63,22 +64,20 @@ def format_data_d(data_d: dict[str : np.ndarray]) -> dict:
             data_d[k] = arr
     t_size = len(data_d['seconds'])
     f_size = len(data_d['frequence'])
-    data_d['wave_form'] = resize_arrays(data_d['wave_form'], t_size)
-    data_d['spectrum'] = resize_arrays(data_d['spectrum'], f_size)
+    data_d['wave_form'] = resize_arrays(data_d['wave_form'], size = t_size)
+    data_d['spectrum'] = resize_arrays(data_d['spectrum'], size = f_size)
     return data_d
 
-def resize_arrays(*arrays: np.ndarray, size : int) -> tuple:
-    arr_resized = []
-    for array in arrays:
-        dif = size - len(array)
-        z_arr = np.array([0]*dif)
-        array = np.concatenate([array,z_arr])
-        arr_resized.append(array)
-    return tuple(arr_resized)
+def resize_arrays(array: np.ndarray, size : int) -> tuple:
+    _array = array[0]
+    dif = size - len(_array)
+    z_arr = np.array([0]*dif)
+    _array = np.concatenate([_array,z_arr])
+    return array
 
 def get_random_colour() -> tuple:
     cmap = plt.cm.get_cmap('viridis', 20)
-    color=cmap(random.randint(0, 19))
+    colour=cmap(random.randint(0, 19))
     return colour
     
 def print_comp_graph(arr_dict: dict) -> None:
@@ -91,4 +90,7 @@ def print_comp_graph(arr_dict: dict) -> None:
     plt.show()
         
 audio_data = signal_plot_data('IRCwidget/100.wav')
-print_comp_graph(audio_data)
+audio_data_2 = signal_plot_data('IRCwidget/100.wav')
+comp_data = mult_plot_data(audio_data, audio_data_2)
+print_comp_graph(comp_data)
+
