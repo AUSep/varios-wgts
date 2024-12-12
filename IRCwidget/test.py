@@ -13,7 +13,7 @@ def get_dtype(wf : wave.Wave_read) -> np.signedinteger:
         dtype = np.int32
     return dtype
 
-def signal_plot_data(file_dir : str) -> dict[np.ndarray]:
+def signal_plot_data(file_dir : str) -> dict[str, list]:
     with wave.open(file_dir, 'rb') as wf:
         channels = wf.getnchannels()
         samp_rate = wf.getframerate()
@@ -27,15 +27,15 @@ def signal_plot_data(file_dir : str) -> dict[np.ndarray]:
             fft_data=np.fft.fft(wf_array)
             spectrum=np.abs(fft_data)
             freqs=np.fft.fftfreq(n=samples, d=1/samp_rate)
-            audio_data_dict : dict = {'wave_form' : wf_array, 
-                                      'seconds' : time, 
-                                      'spectrum' : spectrum,
-                                      'frequence' : freqs}
+            audio_data_dict : dict = {'wave_form' : wf_array.tolist(), 
+                                      'seconds' : time.tolist(), 
+                                      'spectrum' : spectrum.tolist(),
+                                      'frequence' : freqs.tolist()}
             return audio_data_dict
         else:
             raise Exception('The audio file should be mono')
 
-def mult_plot_data(*plot_data: dict[str : np.ndarray]) -> dict[np.ndarray]:
+def mult_plot_data(*plot_data:dict[str, list]) -> dict[str : list]:
     w_arrays: list[np.ndarray] = []
     t_arrays: list[np.ndarray] = []
     s_arrays: list[np.ndarray] = []
@@ -57,7 +57,7 @@ def mult_plot_data(*plot_data: dict[str : np.ndarray]) -> dict[np.ndarray]:
     mult_plot_d = format_data_d(mult_plot_d)
     return mult_plot_data
 
-def format_data_d(data_d: dict[str : np.ndarray]) -> dict:
+def format_data_d(data_d: dict[str, list]) -> dict[str, list]:
     for k in data_d:
         if data_d[k] == 'seconds' or data_d[k] == 'frequence':
             arr = max(data_d[k])
@@ -68,11 +68,10 @@ def format_data_d(data_d: dict[str : np.ndarray]) -> dict:
     data_d['spectrum'] = resize_arrays(data_d['spectrum'], size = f_size)
     return data_d
 
-def resize_arrays(array: np.ndarray, size : int) -> tuple:
-    _array = array[0]
+def resize_arrays(array: list, size : int) -> list:
     dif = size - len(_array)
-    z_arr = np.array([0]*dif)
-    _array = np.concatenate([_array,z_arr])
+    z_arr = [0]*dif
+    array = array.extends(z_arr)
     return array
 
 def get_random_colour() -> tuple:
@@ -90,7 +89,7 @@ def print_comp_graph(arr_dict: dict) -> None:
     plt.show()
         
 audio_data = signal_plot_data('IRCwidget/100.wav')
-audio_data_2 = signal_plot_data('IRCwidget/100.wav')
+audio_data_2 = signal_plot_data('IRCwidget/test.wav')
 comp_data = mult_plot_data(audio_data, audio_data_2)
 print_comp_graph(comp_data)
 
