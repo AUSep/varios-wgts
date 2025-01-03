@@ -37,14 +37,14 @@ def plot_data(*data_d : dict) -> None:
         label = w[1]
         colour = w[2]
         plt.plot(t_arr, arr, colour, label = label)
-    plt.legend()
+        plt.legend()
     plt.show()
     for s in s_arr:
         arr = resize_arrays(s[0], len(f_arr))
-        label = w[1]
-        colour = w[2] 
+        label = s[1]
+        colour = s[2]
         plt.plot(f_arr, arr, colour, label = label)
-    plt.legend()
+        plt.legend()
     plt.show()
         
 def get_dtype(wf : wave.Wave_read) -> np.signedinteger:
@@ -71,7 +71,6 @@ def get_random_colour() -> tuple:
     colour=cmap(random.randint(0, 19))
     return colour
 
-audio_data = signal_data('varios_widgets/IRCwidget/100.wav', 'pure 100')
-print(type(audio_data))
-audio_data_2 = signal_data('varios_widgets/IRCwidget/test.wav', 'sweep')
+audio_data = signal_data('IRCwidget/100.wav', 'pure 100')
+audio_data_2 = signal_data('IRCwidget/test.wav', 'sweep')
 plot_data(audio_data, audio_data_2)
