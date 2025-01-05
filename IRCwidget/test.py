@@ -16,9 +16,8 @@ def signal_data(file_dir : str, label: str) -> dict:
             wf_array : np.ndarray = np.frombuffer(audio_data, dtype)
             fft_data=np.fft.fft(wf_array)
             spectrum=np.abs(fft_data)
-            colour = get_random_colour()
-            audio_data_dict : dict = {'wave_form' : (wf_array.tolist(),label, colour),
-                                      'spectrum' : (spectrum.tolist(),label, colour),
+            audio_data_dict : dict = {'wave_form' : (wf_array.tolist(),label),
+                                      'spectrum' : (spectrum.tolist(),label),
                                       'time' : time.tolist(),
                                       'frequence' : freqs.tolist()}
             return audio_data_dict
@@ -28,23 +27,19 @@ def signal_data(file_dir : str, label: str) -> dict:
 def plot_data(*data_d : dict) -> None:
     w_arr = [data['wave_form'] for data in data_d]
     s_arr = [data['spectrum'] for data in data_d]
-    t_arr = [data['time'] for data in data_d]
-    t_arr = max(t_arr)
-    f_arr = [data['frequence'] for data in data_d]
-    f_arr = max(f_arr)
+    t_arr = max([data['time'] for data in data_d])
+    f_arr = max([data['frequence'] for data in data_d])
     for w in w_arr:
         arr = resize_arrays(w[0], len(t_arr))
         label = w[1]
-        colour = w[2]
-        plt.plot(t_arr, arr, colour, label = label)
-        plt.legend()
+        plt.plot(t_arr, arr, label = label)
+    plt.legend()
     plt.show()
     for s in s_arr:
         arr = resize_arrays(s[0], len(f_arr))
         label = s[1]
-        colour = s[2]
-        plt.plot(f_arr, arr, colour, label = label)
-        plt.legend()
+        plt.plot(f_arr, arr, label = label)
+    plt.legend()
     plt.show()
         
 def get_dtype(wf : wave.Wave_read) -> np.signedinteger:
@@ -53,6 +48,8 @@ def get_dtype(wf : wave.Wave_read) -> np.signedinteger:
         dtype = np.int8
     elif samp_width == 2:
         dtype = np.int16
+    elif samp_width == 3:
+        dtype = np.dtype()
     elif samp_width == 4:
         dtype = np.int32
     return dtype
@@ -62,7 +59,7 @@ def resize_arrays(array: list, size: int) -> list:
         dif = size - len(array)
         z_arr = [0] * dif
         array.extend(z_arr)
-    if len(array) > size:
+    elif len(array) > size:
         array = array[:size]
     return array
 
