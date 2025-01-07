@@ -1,7 +1,6 @@
 import wave
 import numpy as np
 import matplotlib.pyplot as plt
-import random
 
 def signal_data(file_dir : str, label: str) -> dict:
     with wave.open(file_dir, 'rb') as wf:
@@ -63,11 +62,6 @@ def resize_arrays(array: list, size: int) -> list:
         array = array[:size]
     return array
 
-def get_random_colour() -> tuple:
-    cmap = plt.colormaps.get_cmap('viridis')
-    colour=cmap(random.randint(0, 19))
-    return colour
-
-audio_data = signal_data('IRCwidget/100.wav', 'pure 100')
-audio_data_2 = signal_data('IRCwidget/test.wav', 'sweep')
+audio_data = signal_data('varios_widgets/IRCwidget/gtr_test.wav', 'guitarra')
+audio_data_2 = signal_data('varios_widgets/IRCwidget/Bajo_test.wav', 'bajo')
 plot_data(audio_data, audio_data_2)
