@@ -1,48 +1,43 @@
-import wave
 import sys
 import pyaudio
+import numpy as np
+import matplotlib.pyplot as plt
 
-CHUNK = 1024
-FORMAT = pyaudio.paInt16
-CHANNELS = 1 if sys.platform == 'darwin' else 2
-RATE = 44100
-RECORD_SECONDS = 5
-
-def play_audio(file_dir : str) -> None:
-    with wave.open(sys.argv[1], 'rb') as wf:
+class Catchr():
+    def __init__(self):
+        self.__chunk = 1024
+        self.__format = pyaudio.paFloat32
+        self.__channels = 1 if sys.platform == 'darwin' else 2
+        self.__rate = 96000
+    
+    @property
+    def chunk(self) -> int:
+        return self.__chunk
+    
+    @property
+    def format(self) -> int:
+        return self.__format
+    
+    @property
+    def channels(self) -> int:
+        return self.__channels
+    
+    @property
+    def rate(self) -> int:
+        return self.__rate
+    
+    def play_sweep(self) -> None:
+        t = np.linspace(start=0, num=(self.rate)*5, stop=5, dtype=np.float32)
+        n=(self.rate/2)**(1/5)
+        sweep = 0.5* np.sin(2*np.pi*(n**t)*t)
         p = pyaudio.PyAudio()
-
-        o_stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                        channels=wf.getnchannels(),
-                        rate=wf.getframerate(),
-                        output=True)
-        
-        i_stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True)
-
-        while len(data := wf.readframes(CHUNK)):
-            o_stream.write(data)
-
-        for _ in range(0, RATE // CHUNK * RECORD_SECONDS):
-            wf.writeframes(i_stream.read(CHUNK))
-
+        o_stream = p.open(format=self.format,
+                          channels=self.channels,
+                          rate=self.rate,
+                          output=True)
+        o_stream.write(sweep.tobytes())
         o_stream.close()
-        i_stream.close()
         p.terminate()
 
-
-def record_audio() -> None:
-    with wave.open('output.wav', 'wb') as wf:
-        p = pyaudio.PyAudio()
-        wf.setnchannels(CHANNELS)
-        wf.setsampwidth(p.get_sample_size(FORMAT))
-        wf.setframerate(RATE)
-
-        stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True)
-
-        print('Recording...')
-        for _ in range(0, RATE // CHUNK * RECORD_SECONDS):
-            wf.writeframes(stream.read(CHUNK))
-        print('Done')
-
-        stream.close()
-        p.terminate()
+test = Catchr()
+test.play_sweep()

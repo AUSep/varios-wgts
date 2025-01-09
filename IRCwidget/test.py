@@ -11,8 +11,8 @@ def signal_data(file_dir : str, label: str) -> dict:
             dtype = get_dtype(wf)
             time = np.arange(samples)/samp_rate
             freqs = np.fft.fftfreq(n=samples, d=1/samp_rate)
-            audio_data : bytes = wf.readframes(samples)
-            wf_array : np.ndarray = np.frombuffer(audio_data, dtype)
+            audio_data = wf.readframes(samples)
+            wf_array  = np.frombuffer(audio_data, dtype)
             fft_data=np.fft.fft(wf_array)
             spectrum=np.abs(fft_data)
             audio_data_dict : dict = {'wave_form' : (wf_array.tolist(),label),
@@ -47,8 +47,6 @@ def get_dtype(wf : wave.Wave_read) -> np.signedinteger:
         dtype = np.int8
     elif samp_width == 2:
         dtype = np.int16
-    elif samp_width == 3:
-        dtype = np.dtype()
     elif samp_width == 4:
         dtype = np.int32
     return dtype
@@ -62,6 +60,16 @@ def resize_arrays(array: list, size: int) -> list:
         array = array[:size]
     return array
 
+def binary_to_db(array: np.ndarray, dtype:np.signedinteger) -> list:
+    if dtype == np.int16:
+        n=16
+    elif dtype == np.int32:
+        n=32
+    db_array=[]
+    for v in array:
+        v = 20*np.log10(np.abs(v)/2**(n-1))
+        db_array.append(v)
+    return db_array
 audio_data = signal_data('varios_widgets/IRCwidget/gtr_test.wav', 'guitarra')
 audio_data_2 = signal_data('varios_widgets/IRCwidget/Bajo_test.wav', 'bajo')
 plot_data(audio_data, audio_data_2)
