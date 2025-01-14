@@ -11,6 +11,7 @@ class Catchr():
         self.__rate = 96000
         self.__output = pa.PyAudio()
         self.__input = pa.PyAudio()
+        self.__f_sweep = 100
     
     @property
     def chunk(self) -> int:
@@ -35,6 +36,10 @@ class Catchr():
     @property
     def input(self) -> pa.PyAudio:
         return self.__input
+    
+    @property
+    def f_sweep(self) -> bool:
+        return self.__f_sweep
 
     def play(self, signal : np.ndarray) -> None:
         o_stream = self.open_port(self.output)
@@ -42,17 +47,23 @@ class Catchr():
         o_stream.close()
         self.output.terminate()
     
-    def calibrate(self) -> None:
+    def vol_in(self, stream : pa.Stream) -> float:
+        while stream.is_active() == True:
+            stream.read()
+
+    def calibrate(self) -> pa.Stream:
         o_stream = self.open_port(self.output)
+        i_stream = self.open_port(self.input)
         i=0
         tone = self.tone()
-        while o_stream.is_active():
+        while o_stream.is_active() == True:
             data = tone[i:i+self.chunk]
             if i<len(tone):
                 i+=self.chunk
             else:
                 i=0
             o_stream.write(data)
+        return o_stream, i_stream
 
     def open_port(self, port : pa.PyAudio) -> pa.Stream:
         stream = port.open(format=self.format,
@@ -63,9 +74,10 @@ class Catchr():
         return stream
             
     def sweep(self) -> np.ndarray:
-        t = np.linspace(start=0, num=(self.rate)*5, stop=5, dtype=np.float32)
-        n=(self.rate/50)
-        sweep = 0.25*np.sin(2*np.pi*n*(t**2))
+        t = np.linspace(start=0, num=self.rate*5, stop=1, dtype=np.float32)
+        f = t*(self.f_sweep)
+        print(f[-1])
+        sweep = 0.25*np.sin(2*np.pi*f*t)
         return sweep
     
     def pulse(self) -> np.ndarray:
@@ -78,8 +90,8 @@ class Catchr():
     
     def tone(self) -> np.ndarray:
         t=np.linspace(start=0, num=self.rate, stop=1, dtype=np.float32)
-        tone =0.25*np.sin(2*np.pi*500*t)
+        tone =0.25*np.sin(2*np.pi*100*t)
         return tone
 
 a = Catchr()
-a.play(a.tone())
+a.play(a.sweep()) 
