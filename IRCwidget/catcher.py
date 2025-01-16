@@ -7,14 +7,13 @@ from scipy.signal import chirp
 
 class Catchr():
     def __init__(self):
-        self.__chunk = 64
+        self.__chunk = 1024
         self.__format = pa.paFloat32
         self.__channels = 1 if sys.platform == 'darwin' else 2
-        self.__rate = 192000
+        self.__rate = 96000
         self.__output = pa.PyAudio()
         self.__input = pa.PyAudio()
-        self.__f_sweep = 22000
-    
+        
     @property
     def chunk(self) -> int:
         return self.__chunk
@@ -39,10 +38,6 @@ class Catchr():
     def input(self) -> pa.PyAudio:
         return self.__input
     
-    @property
-    def f_sweep(self) -> bool:
-        return self.__f_sweep
-
     def play(self, signal : np.ndarray) -> None:
         o_stream = self.open_port(self.output)
         o_stream.write(signal.tobytes())
@@ -50,8 +45,12 @@ class Catchr():
         self.output.terminate()
     
     def vol_in(self, stream : pa.Stream) -> float:
-        while stream.is_active() == True:
-            stream.read()
+        audio_chunk = stream.read(self.chunk)
+        audio_data = np.frombuffer(audio_chunk)
+        sq_sum = np.square(audio_data)
+        rms = np.sqrt(np.mean(sq_sum))
+        print(type(rms))
+        return rms
 
     def calibrate(self) -> pa.Stream:
         o_stream = self.open_port(self.output)
@@ -72,12 +71,13 @@ class Catchr():
                         channels=self.channels,
                         rate=self.rate,
                         output=True if port == self.output else False,
-                        input=True if port == self.input else False)
+                        input=True if port == self.input else False,
+                        input_device_index = pa.paJACK)
         return stream
             
     def sweep(self) -> np.ndarray:
-        t = np.linspace(start=0, num=self.rate*5, stop=5, dtype=np.float32)
-        sweep = 0.25*chirp(t,0,5,self.f_sweep,'linear')
+        t = np.linspace(start=0, num=self.rate*3, stop=3, dtype=np.float32)
+        sweep = 0.25*chirp(t,0,5,20000,'linear')
         sweep = np.array(sweep, dtype=np.float32)
         return sweep
     
