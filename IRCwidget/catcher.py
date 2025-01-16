@@ -10,7 +10,7 @@ class Catchr():
         self.__chunk = 1024
         self.__format = pa.paFloat32
         self.__channels = 1 if sys.platform == 'darwin' else 2
-        self.__rate = 96000
+        self.__rate = 44100 
         self.__output = pa.PyAudio()
         self.__input = pa.PyAudio()
         
@@ -76,8 +76,8 @@ class Catchr():
         return stream
             
     def sweep(self) -> np.ndarray:
-        t = np.linspace(start=0, num=self.rate*3, stop=3, dtype=np.float32)
-        sweep = 0.25*chirp(t,0,5,20000,'linear')
+        t = np.linspace(start=0, num=self.rate*30, stop=30, dtype=np.float32)
+        sweep = 0.25*chirp(t,10,30,20000,'quadratic')
         sweep = np.array(sweep, dtype=np.float32)
         return sweep
     
