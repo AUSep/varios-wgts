@@ -2,16 +2,18 @@ import sys
 import pyaudio as pa
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.signal import chirp
+
 
 class Catchr():
     def __init__(self):
         self.__chunk = 64
         self.__format = pa.paFloat32
         self.__channels = 1 if sys.platform == 'darwin' else 2
-        self.__rate = 96000
+        self.__rate = 192000
         self.__output = pa.PyAudio()
         self.__input = pa.PyAudio()
-        self.__f_sweep = 100
+        self.__f_sweep = 22000
     
     @property
     def chunk(self) -> int:
@@ -74,10 +76,9 @@ class Catchr():
         return stream
             
     def sweep(self) -> np.ndarray:
-        t = np.linspace(start=0, num=self.rate*5, stop=1, dtype=np.float32)
-        f = t*(self.f_sweep)
-        print(f[-1])
-        sweep = 0.25*np.sin(2*np.pi*f*t)
+        t = np.linspace(start=0, num=self.rate*5, stop=5, dtype=np.float32)
+        sweep = 0.25*chirp(t,0,5,self.f_sweep,'linear')
+        sweep = np.array(sweep, dtype=np.float32)
         return sweep
     
     def pulse(self) -> np.ndarray:
@@ -95,3 +96,4 @@ class Catchr():
 
 a = Catchr()
 a.play(a.sweep()) 
+
