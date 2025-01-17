@@ -2,7 +2,7 @@ import sys
 import pyaudio as pa
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import chirp, butter, sosfreqz, sosfilt
+from scipy.signal import chirp, butter, sosfilt
 
 
 class Catchr():
@@ -10,7 +10,7 @@ class Catchr():
         self.__chunk = 1024
         self.__format = pa.paFloat32
         self.__channels = 1 if sys.platform == 'darwin' else 2
-        self.__rate = 96000 
+        self.__rate = 44100
         self.__output = pa.PyAudio()
         self.__input = pa.PyAudio()
         
@@ -71,14 +71,13 @@ class Catchr():
                         channels=self.channels,
                         rate=self.rate,
                         output=True if port == self.output else False,
-                        input=True if port == self.input else False,
-                        input_device_index = pa.paJACK)
+                        input=True if port == self.input else False)
         return stream
             
     def sweep(self) -> np.ndarray: 
-        t = np.linspace(start=0, num=self.rate*30, stop=30)
-        sweep = 0.25*chirp(t,10,30,22050,'quadratic')
-        sos = butter(10, (20000/self.rate), output='sos')
+        t = np.linspace(start=0, num=self.rate*45, stop=30)
+        sweep = 0.25*chirp(t,10,45,22050,'quadratic')
+        sos = butter(10, (22000/self.rate), output='sos')
         sweep = sosfilt(sos, sweep)
         sweep = np.array(sweep, dtype=np.float32)
         return sweep
