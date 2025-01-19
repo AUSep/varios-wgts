@@ -3,9 +3,7 @@ import pyaudio as pa
 import numpy as np
 import gevent as gv
 import matplotlib.pyplot as plt
-
 from scipy.signal import chirp, butter, sosfilt
-
 
 class Catchr():
     def __init__(self):
@@ -15,7 +13,7 @@ class Catchr():
         self.__rate = 44100
         self.__output = pa.PyAudio()
         self.__input = pa.PyAudio()
-        self.__delay = None
+        self.__delay = 0
         
     @property
     def chunk(self) -> int:
@@ -48,6 +46,10 @@ class Catchr():
     @property
     def delay(self) -> int:
         return self.__delay
+    
+    @delay.setter
+    def delay(self, samples : int) ->None:
+        self.__delay = samples
     
     def sweep(self, amp = float) -> np.ndarray: 
         t = np.linspace(start=0, num=self.rate*45, stop=30)
@@ -96,6 +98,19 @@ class Catchr():
         gv.sleep(1)
         return audio_data
     
+    def wait_pulse(self) -> int:
+        i_stream = self.open_port(self.input)
+        peak = 0.0
+        samp_counter = 0
+        while peak<0.6:
+            audio_chunk = i_stream.read(self.chunk)
+            audio_data = np.array(audio_chunk, dtype = np.float32)
+            peak = np.amax(audio_data)
+            samp_counter+=self.chunk
+            samp_offset = np.argmax(audio_data)
+        samp_delay = samp_counter + samp_offset
+        return samp_delay
+
     def rms(self, audio_data : np.ndarray) -> float:
         sq_sum = np.square(audio_data)
         rms = np.sqrt(np.mean(sq_sum))
@@ -107,6 +122,12 @@ class Catchr():
         audio_data = np.frombuffer(audio_chunk)
         rms = self.rms(audio_data)
         return rms
+
+    def set_delay(self) -> None:
+        play_routine = gv.spawn(self.play(self.pulse()))
+        rec_routine =  gv.spawn(self.wait_pulse())
+        gv.joinall([play_routine, rec_routine])
+        self.delay = rec_routine.get()
     
     def get_return_lvl(self, signal : np.ndarray) -> float:
         signal_return = self.get_return(signal)
@@ -121,7 +142,8 @@ class Catchr():
         return signal_return
     
     def max_gain_test(self) -> tuple[float,float]:
-        noise_lvl = self.get_return_lvl(self.rate*5)
+        noise = self.rec(self.rate*5)
+        noise_lvl = self.rms(noise)
         max_amp=0
         lvl = 0
         while lvl <0.9:
@@ -136,10 +158,12 @@ class Catchr():
         while amp < max_amp:
             amp+=0.01
             sweep = self.sweep(amp)
-            self.play(sweep)
-            audio_array = self.comunicate(sweep)
+            audio_array = self.get_return(sweep)
             sweep_returns[amp] = audio_array
         return sweep_returns
+
+    def catch_ir(self) -> None:
+        pass
 
 a = Catchr()
 a.play(a.sweep(0.25)) 
