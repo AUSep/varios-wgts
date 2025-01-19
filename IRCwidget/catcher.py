@@ -90,7 +90,7 @@ class Catchr():
     def rec(self, len : int) -> np.ndarray:
         i_stream = self.open_port(self.input)
         audio_data = i_stream.read(len)
-        audio_data = np.array(audio_data)
+        audio_data = np.array(audio_data, dtype = np.float32)
         i_stream.close()
         self.input.terminate()
         gv.sleep(1)
@@ -108,26 +108,26 @@ class Catchr():
         rms = self.rms(audio_data)
         return rms
     
-    def comunicate(self, signal : np.ndarray) -> np.ndarray:
+    def get_return_lvl(self, signal : np.ndarray) -> float:
+        signal_return = self.get_return(signal)
+        return_level =self.rms(signal_return)
+        return return_level
+    
+    def get_return(self, signal : np.ndarray) -> np.ndarray:
         play_routine = gv.spawn(self.play(signal))
         rec_routine = gv.spawn_later(self.delay, self.rec(len(signal)))
         gv.joinall([play_routine,rec_routine])
         signal_return = rec_routine.get()
         return signal_return
-
+    
     def max_gain_test(self) -> tuple[float,float]:
-        stream = self.open_port(self.input)
-        noise = stream.read(self.rate*5)
-        noise_lvl= self.rms(np.array(noise, dtype=np.float32))
+        noise_lvl = self.get_return_lvl(self.rate*5)
         max_amp=0
-        while stream.is_active():
-            audio_data
-            tone = self.tone(max_amp)
-            self.play(tone)
+        lvl = 0
+        while lvl <0.9:
             max_amp+=0.01
-            audio_data = stream.read(len(tone))
-            if self.rms(audio_data) >= 0.9:
-                stream.close()
+            tone = self.tone(max_amp)
+            lvl = self.get_return_lvl(tone)
         return max_amp, noise_lvl
 
     def sweep_test(self, max_amp : float) -> dict:
