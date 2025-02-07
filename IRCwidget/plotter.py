@@ -1,5 +1,6 @@
 import pyaudio as pa
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 import numpy as np
 import wave
 
@@ -18,17 +19,16 @@ def plot_audio_data(*audio_data : str | tuple[np.ndarray, int, int]) -> None:
         s_arrays.append(spect_array)
     t_array = np.linspace(0, max_len/samp_rate, max_len)
     w_arrays = [resize_array(array, max_len) for array in w_arrays]
-    plt.figure() 
-    plt.subplot(211)
+    figure, (ax0, ax1) = plt.subplot(2,1)
     i=0
     for wave_array in w_arrays:
         i=+1
-        plt.plot(t_array, wave_array)
+        ax0.plot(t_array, wave_array, label = f"audio {i}")
+        leg = ax0.legend(shadow = True, fancybox=True)
     i=0
-    plt.subplot(212)
     for spect_array in s_arrays:
         i=+1
-        plt.plot(f_array, spect_array)
+        ax1.plot(f_array, spect_array)
     plt.show()
 
 def get_wave_data(audio_data : str) -> tuple[np.ndarray, int, int]:
