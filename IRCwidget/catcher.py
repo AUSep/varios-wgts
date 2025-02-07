@@ -43,15 +43,42 @@ class Catchr():
     def input(self) -> pa.PyAudio:
         return self.__input
     
-    @property
-    def delay(self) -> int:
-        return self.__delay
+    def play(self, signal : np.ndarray) -> None:
+        o_stream = self.open_port(self.output)
+        o_stream.write(signal.tobytes())
+        o_stream.close()
+        self.output.terminate()
     
-    @delay.setter
-    def delay(self, samples : int) ->None:
-        self.__delay = samples
-    
-    def sweep(self, amp = float) -> np.ndarray: 
+    def vol_in(self, stream : pa.Stream) -> float:
+        audio_chunk = stream.read(self.chunk)
+        audio_data = np.frombuffer(audio_chunk)
+        sq_sum = np.square(audio_data)
+        rms = np.sqrt(np.mean(sq_sum))
+        return rms
+
+    def calibrate(self) -> pa.Stream:
+        o_stream = self.open_port(self.output)
+        i_stream = self.open_port(self.input)
+        i=0
+        tone = self.tone()
+        while o_stream.is_active() == True:
+            data = tone[i:i+self.chunk]
+            if i<len(tone):
+                i+=self.chunk
+            else:
+                i=0
+            o_stream.write(data)
+        return o_stream, i_stream
+
+    def open_port(self, port : pa.PyAudio) -> pa.Stream:
+        stream = port.open(format=self.format,
+                        channels=self.channels,
+                        rate=self.rate,
+                        output=True if port == self.output else False,
+                        input=True if port == self.input else False)
+        return stream
+            
+    def sweep(self) -> np.ndarray: 
         t = np.linspace(start=0, num=self.rate*45, stop=30)
         sweep = amp*chirp(t,10,45,22050,'quadratic')
         sos = butter(10, (22000/self.rate), output='sos')
