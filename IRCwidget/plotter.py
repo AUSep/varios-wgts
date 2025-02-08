@@ -58,12 +58,7 @@ def resize_array(array : np.ndarray, length : int) -> np.ndarray:
         
 def get_spect_data(wave_array : np.ndarray, samp_rate : int) -> tuple[np.ndarray, np.ndarray]:
     f_array = np.fft.fftfreq(22000, 1/samp_rate)
+    f_array.astype(np.float32)
     spect_array = np.abs(np.fft.fft(wave_array, 22000))
+    spect_array.astype(np.float32)
     return f_array, spect_array
-
-t1 = np.linspace(0,1,44100)
-x1 = 3*np.sin(2*np.pi*50*t1)
-x2 = 1.5*np.sin(2*np.pi*20*t1) 
-audio_data1=(x1,44100,44100)
-audio_data2=(x2,44100,44100)
-plot_audio_data(audio_data1,audio_data2)

@@ -78,7 +78,7 @@ class Catchr():
                         input=True if port == self.input else False)
         return stream
             
-    def sweep(self) -> np.ndarray: 
+    def sweep(self, amp : float) -> np.ndarray: 
         t = np.linspace(start=0, num=self.rate*45, stop=30)
         sweep = amp*chirp(t,10,45,22050,'quadratic')
         sos = butter(10, (22000/self.rate), output='sos')
