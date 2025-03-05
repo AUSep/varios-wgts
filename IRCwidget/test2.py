@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import find_peaks
 from plotter import plot_audio_data, get_spect_data
 
-sample_rate = 44100
+sample_rate = 96000
 
 t = np.linspace(0,1,sample_rate, dtype=np.float32)
 x1 = 0.9*np.sin(2*np.pi*20*t)
