@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <portaudio.h>
 #include <cstring>
+#include <fftw3.h>
 
 #define SAMPLE_RATE 44100
 #define FRAMES_PER_BUFFER 512
