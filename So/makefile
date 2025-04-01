@@ -3,7 +3,7 @@ EXEC = paconfig
 CLIB = -I./lib/portaudio/include ./lib/portaudio/lib/.libs/libportaudio.a -lrt -lm -lasound -ljack -pthread \
 -I./lib/fftw-3.3.10/api -lfftw3
 
-$(EXEC): main.cpp
+$(EXEC): main.cpp soundstrm.cpp
 	g++ -o $@ $^ $(CLIB)
 
 install-fftw:
