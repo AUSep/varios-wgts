@@ -43,6 +43,14 @@ static void displayDeviceInfo() {
         printf("    Outputs: %d\n", devInfo->maxOutputChannels);
     }
 }
+static void displayDefaultDeviceInfo() {
+    const PaDeviceInfo* devInfo;
+    printf("default audio device:");
+    PaDeviceIndex defOutDev = Pa_GetDefaultOutputDevice();
+    printf("decive %d", defOutDev);
+    devInfo = Pa_GetDeviceInfo(defOutDev);
+    printf("    Name: %s", devInfo->name);
+}
 
 static inline float max(float a, float b) {
     return a > b ? a : b;

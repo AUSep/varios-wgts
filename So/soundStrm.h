@@ -1,6 +1,7 @@
 #ifndef SOUNDSTRM_H
 #define SOUNDSTRM_H
 #include <portaudio.h>
+#include <vector>
 
 enum StreamType {
     INPUT,
@@ -10,16 +11,23 @@ enum StreamType {
 class StreamHandler {
     public:
         StreamHandler(double sampleRate, int framesPerBuffer);
-        static void dispĺayDeviceInfo();
-        void startStream(StreamType StreamType);
         void setDevice(PaDeviceIndex device);
+        void setFamesPerBuffer(int framesPerBuffer);
+        void setSampleRate(double sampleRate);
+        static void dispĺayDeviceInfo();
+        void play(std::vector<float>& signal);
     private:
         static void checkErr(PaError err);
-        void initStreamParameters(PaStreamParameters streamParameters, int device, StreamType streamType);
+        PaStreamParameters initStreamParameters(int device, StreamType streamType);
         double sampleRate;
         int framesPerBuffer;
         PaStream* Stream;
         PaDeviceIndex device;
+        static int paOutCallback(
+            const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
+            const  PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlag,
+            void* userData
+        );
 };
 
 #endif //SOUNDSTRM_H

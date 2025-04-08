@@ -13,22 +13,23 @@ StreamHandler::StreamHandler(double sampleRate, int framesPerBuffer) {
     this->dispĺayDeviceInfo();
     this->device = Pa_GetDefaultOutputDevice();
 }
+
+/*Attribute setters*/
+void StreamHandler::setDevice(PaDeviceIndex device){
+    this->device = device;
+}
+void StreamHandler::setFamesPerBuffer(int framesPerBuffer){
+    this->framesPerBuffer = framesPerBuffer;
+}
+void StreamHandler::setSampleRate(double sampleRate){
+    this->sampleRate = sampleRate;
+}
+
 /*Error handler for Port Audio*/
 void StreamHandler::checkErr(PaError err){
     if (err != paNoError) {
         printf("PortAudio error:%s\n", Pa_GetErrorText(err));
         exit(EXIT_FAILURE);
-    }
-}
-
-void StreamHandler::setDevice(PaDeviceIndex device){
-    this->device = device;
-    const PaDeviceInfo* devInfo;
-    devInfo = Pa_GetDeviceInfo(device);
-    int InPorts = devInfo->maxInputChannels;
-    int OutPorts = devInfo->maxOutputChannels;
-    for (int i = 0; i <= InPorts; i++) {
-        
     }
 }
 
@@ -45,8 +46,9 @@ void StreamHandler::dispĺayDeviceInfo() {
         printf("    Outputs: %d\n", devInfo->maxOutputChannels);
     }
 }
-
-void StreamHandler::initStreamParameters(PaStreamParameters streamParameters, int device, StreamType streamType){
+/*Sets the parameters of a stream to initialize it*/
+PaStreamParameters StreamHandler::initStreamParameters(int device, StreamType streamType){
+    PaStreamParameters streamParameters;
     memset(&streamParameters, 0, sizeof(streamParameters));
     streamParameters.device = device;
     streamParameters.channelCount = 2;
@@ -61,12 +63,42 @@ void StreamHandler::initStreamParameters(PaStreamParameters streamParameters, in
     else {
         printf("Invalid stream type");
     }
+    return streamParameters
 };
 
-void StreamHandler::startStream(StreamType StreamType) {
-    PaStreamParameters streamParameters;
-    this->initStreamParameters(streamParameters, this->device; );
 
+PaStream* StreamHandler::newStream(StreamType streamType) {
+    PaStreamParameters streamParameters;
+    streamParameters = this->initStreamParameters(this->device, streamType);
+    PaStream* stream = nullptr;
+    PaError err;
+    if (streamType == INPUT) {
+        err = Pa_OpenStream(
+            &stream,
+            NULL,
+            &streamParameters,
+            this->sampleRate,
+            this->framesPerBuffer,
+            paNoFlag,
+            paInCallback,
+            NULL
+        );
+        this->checkErr(err);
+    }
+    else if(streamType == OUTPUT) {
+        err = Pa_OpenStream(
+            &stream,
+            &streamParameters,
+            NULL,
+            this->sampleRate,
+            this->framesPerBuffer,
+            paNoFlag,
+            paOutCallback,
+            NULL
+        );
+        this->checkErr(err);
+    }
+    return stream;
 }
 
 
@@ -74,7 +106,7 @@ static inline float max(float a, float b) {
     return a > b ? a : b;
 }
 
-static int paTestCallback(
+static int paInCallback(
     const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
     const  PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlag,
     void* userData
