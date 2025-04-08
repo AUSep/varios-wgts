@@ -7,21 +7,33 @@
 #define SAMPLE_RATE 44100
 #define FRAMES_PER_BUFFER 512
 
-Streamer::Streamer(double sampleRate, int framesPerBuffer) {
+StreamHandler::StreamHandler(double sampleRate, int framesPerBuffer) {
     this->sampleRate = sampleRate;
     this->framesPerBuffer = framesPerBuffer;
     this->dispĺayDeviceInfo();
+    this->device = Pa_GetDefaultOutputDevice();
 }
 /*Error handler for Port Audio*/
-void Streamer::checkErr(PaError err){
+void StreamHandler::checkErr(PaError err){
     if (err != paNoError) {
         printf("PortAudio error:%s\n", Pa_GetErrorText(err));
         exit(EXIT_FAILURE);
     }
-};
+}
 
-/*Counts every audio deice on the machine. Each device information is displayed using their indexes */
-void Streamer::dispĺayDeviceInfo() {
+void StreamHandler::setDevice(PaDeviceIndex device){
+    this->device = device;
+    const PaDeviceInfo* devInfo;
+    devInfo = Pa_GetDeviceInfo(device);
+    int InPorts = devInfo->maxInputChannels;
+    int OutPorts = devInfo->maxOutputChannels;
+    for (int i = 0; i <= InPorts; i++) {
+        
+    }
+}
+
+/*Counts every audio device on the machine. Each device information is displayed using their indexes */
+void StreamHandler::dispĺayDeviceInfo() {
     int count = Pa_GetDeviceCount();
     printf("%d audio devices found:\n", count);
     const PaDeviceInfo* devInfo;
@@ -32,9 +44,9 @@ void Streamer::dispĺayDeviceInfo() {
         printf("    Inputs: %d\n", devInfo->maxInputChannels);
         printf("    Outputs: %d\n", devInfo->maxOutputChannels);
     }
-};
+}
 
-void Streamer::initStreamParameters(PaStreamParameters streamParameters, int device, StreamType streamType){
+void StreamHandler::initStreamParameters(PaStreamParameters streamParameters, int device, StreamType streamType){
     memset(&streamParameters, 0, sizeof(streamParameters));
     streamParameters.device = device;
     streamParameters.channelCount = 2;
@@ -49,7 +61,14 @@ void Streamer::initStreamParameters(PaStreamParameters streamParameters, int dev
     else {
         printf("Invalid stream type");
     }
+};
+
+void StreamHandler::startStream(StreamType StreamType) {
+    PaStreamParameters streamParameters;
+    this->initStreamParameters(streamParameters, this->device; );
+
 }
+
 
 static inline float max(float a, float b) {
     return a > b ? a : b;

@@ -7,16 +7,19 @@ enum StreamType {
     OUTPUT
 };
 
-class Streamer {
+class StreamHandler {
     public:
-        Streamer(double sampleRate, int framesPerBuffer);
-        double sampleRate;
-        int framesPerBuffer;
+        StreamHandler(double sampleRate, int framesPerBuffer);
         static void dispĺayDeviceInfo();
-        void initStreamParameters(PaStreamParameters streamParameters, int device, StreamType streamType);
+        void startStream(StreamType StreamType);
+        void setDevice(PaDeviceIndex device);
     private:
         static void checkErr(PaError err);
-
+        void initStreamParameters(PaStreamParameters streamParameters, int device, StreamType streamType);
+        double sampleRate;
+        int framesPerBuffer;
+        PaStream* Stream;
+        PaDeviceIndex device;
 };
 
 #endif //SOUNDSTRM_H
