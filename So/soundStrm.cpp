@@ -63,136 +63,50 @@ PaStreamParameters StreamHandler::initStreamParameters(int device, StreamType st
     else {
         printf("Invalid stream type");
     }
-    return streamParameters
+    return streamParameters;
 };
 
-
-PaStream* StreamHandler::newStream(StreamType streamType) {
-    PaStreamParameters streamParameters;
-    streamParameters = this->initStreamParameters(this->device, streamType);
-    PaStream* stream = nullptr;
+void StreamHandler::play(std::vector<float>& signal) {
     PaError err;
-    if (streamType == INPUT) {
-        err = Pa_OpenStream(
-            &stream,
-            NULL,
-            &streamParameters,
-            this->sampleRate,
-            this->framesPerBuffer,
-            paNoFlag,
-            paInCallback,
-            NULL
-        );
-        this->checkErr(err);
-    }
-    else if(streamType == OUTPUT) {
-        err = Pa_OpenStream(
-            &stream,
-            &streamParameters,
-            NULL,
-            this->sampleRate,
-            this->framesPerBuffer,
-            paNoFlag,
-            paOutCallback,
-            NULL
-        );
-        this->checkErr(err);
-    }
-    return stream;
+    PaStreamParameters parameters = this->initStreamParameters(this->device, OUTPUT);
+    PaStream* stream = nullptr;
+    err = Pa_OpenStream(
+        &stream,
+        NULL,
+        &parameters,
+        this->sampleRate,
+        this->framesPerBuffer,
+        paNoFlag,
+        paOutCallback,
+        reinterpret_cast<void*>(&signal)
+    );
 }
-
-
-static inline float max(float a, float b) {
-    return a > b ? a : b;
-}
-
-static int paInCallback(
+int StreamHandler::paOutCallback(
     const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
     const  PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlag,
     void* userData
 ) {
+    AudioData* data = static_cast<AudioData*>(userData);
+    float* out = static_cast<float*>(outputBuffer);
 
-    float* in = (float*) inputBuffer;
-    (void)outputBuffer;
-
-    int dispSize = 100;
-    printf("\r");
-
-    float vol_r = 0;
-    float vol_l = 0;
-    
-    for (unsigned long i = 0; i < framesPerBuffer * 2 ; i += 2 ) {
-        vol_l = max(vol_l, std::abs(in[i]));
-        vol_r = max(vol_r, std::abs(in[i+1]));
+    if(data->signal == nullptr) {
+        for (unsigned long i = 0; i < framesPerBuffer; i++){
+            *out = 0.0f;
+        }
     }
+    return paContinue;
 
-    for (int i = 0; i < dispSize; i++) {
-        float barProportion = i/(float)dispSize;
-        if (barProportion <= vol_l && barProportion <= vol_r) {
-            printf("█");
+    size_t signalSize = data->signal->size();
+
+    for (unsigned long i=0; i<framesPerBuffer;i++){
+        if (data->position < signalSize){
+            *out++=(*data->signal)[data->position++];
         }
-        else if ( barProportion <= vol_l ) {
-            printf("▀");
-        }
-        else if ( barProportion <= vol_r ) {
-            printf("▄");
-         }
         else {
-            printf(" ");
+            *out = 0.0f;
         }
-
     }
-    fflush(stdout);
-
-    return 0;
+    if (data->position >= signalSize) {
+        return paComplete;
+    }
 }
-int main(){
-    /*Start PortAudio*/
-    PaError err; 
-    err = Pa_Initialize();
-    Streamer streamPorts;
-    streamPorts.checkErr(err);
-    
-    streamPorts.dispĺayDeviceInfo();
-
-    /*Selects an específic audio device and sets the parameters for the output and input
-    streams to 0*/
-    int device = 2;
-    PaStreamParameters inStreamParameters;
-    PaStreamParameters outStreamParameters;
-
-    streamPorts.initStreamParameters(inStreamParameters, device, INPUT);
-    streamPorts.initStreamParameters(outStreamParameters, device, OUTPUT);
-    
-    /*Initailize and open a stream*/
-
-    PaStream* stream;
-    err = Pa_OpenStream(
-        &stream,
-        &inStreamParameters,
-        &outStreamParameters,
-        SAMPLE_RATE,
-        FRAMES_PER_BUFFER,
-        paNoFlag,
-        paTestCallback,
-        NULL
-    );
-    streamPorts.checkErr(err);
-
-    err = Pa_StartStream(stream);
-    streamPorts.checkErr(err);
-
-    Pa_Sleep(10 * 1000);
-
-    err = Pa_StopStream(stream);
-    streamPorts.checkErr(err);
-
-    err = Pa_CloseStream(stream);
-    streamPorts.checkErr(err);
-
-    /*Ends PortAudio*/
-    err = Pa_Terminate();
-    streamPorts.checkErr(err);
-    return EXIT_SUCCESS;
-}
-

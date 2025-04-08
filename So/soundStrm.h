@@ -8,6 +8,11 @@ enum StreamType {
     OUTPUT
 };
 
+struct AudioData{
+    std::vector<float>* signal;
+    size_t position;
+};
+
 class StreamHandler {
     public:
         StreamHandler(double sampleRate, int framesPerBuffer);
