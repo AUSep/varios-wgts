@@ -80,6 +80,18 @@ void StreamHandler::play(std::vector<float>& signal) {
         paOutCallback,
         reinterpret_cast<void*>(&signal)
     );
+
+    err = Pa_StartStream(stream);
+    this->checkErr(err);
+
+    Pa_Sleep(static_cast<int>(signal.size() * 1000/this->sampleRate));
+
+    err = Pa_StopStream(stream);
+    this->checkErr(err);
+
+    err = Pa_CloseStream(stream);
+    this->checkErr(err);
+
 }
 int StreamHandler::paOutCallback(
     const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
