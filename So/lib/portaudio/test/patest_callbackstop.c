@@ -1,5 +1,4 @@
-/** @file patest_callbackstop.c
-    @ingroup test_src
+/** @file patest_callbackstop.c    @ingroup test_src
     @brief Test the paComplete callback result code.
     @author Ross Bencina <rossb@audiomulch.com>
 */
